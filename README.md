@@ -1,11 +1,11 @@
-# react-native-identity-kyc
+# prembly-react-native-identity-kyc
 
 React Native version of the Prembly Identity KYC Verification SDK.
 
 ## Installation
 
 ```bash
-npm install react-native-identity-kyc
+npm install prembly-react-native-identity-kyc
 # Also install peer dependencies if not already present
 npm install react-native-webview
 ```
@@ -15,7 +15,7 @@ npm install react-native-webview
 ```tsx
 import React, { useState } from 'react';
 import { View, Button } from 'react-native';
-import { PremblyIdentityWidget } from 'react-native-identity-kyc';
+import { PremblyIdentityWidget } from 'prembly-react-native-identity-kyc';
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(false);
