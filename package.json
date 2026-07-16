@@ -1,0 +1,32 @@
+{
+  "name": "react-native-identity-kyc",
+  "version": "1.0.0",
+  "description": "React Native Identity KYC Verification library",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepack": "npm run build"
+  },
+  "keywords": [
+    "react-native",
+    "prembly",
+    "kyc",
+    "identity"
+  ],
+  "author": "Prembly",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.70.0",
+    "react-native-webview": ">=11.0.0"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "react-native": "^0.74.0",
+    "react-native-webview": "^13.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.72.0",
+    "typescript": "^5.0.0"
+  }
+}
