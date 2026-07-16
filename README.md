@@ -32,6 +32,9 @@ const App = () => {
         phone="+2348012345678"
         firstName="John"
         lastName="Doe"
+        metadata={{
+          user_id: "123456"
+        }}
         callback={(response) => {
           console.log('Widget Response:', response);
           if (response.status === 'closed' || response.status === 'error_display_closed' || response.status === 'success') {
