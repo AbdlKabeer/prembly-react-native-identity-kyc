@@ -1,5 +1,5 @@
 {
-  "name": "prembly-react-native-identity-kyc",
+  "name": "prembly-react-native-kyc",
   "version": "1.0.0",
   "description": "React Native Identity KYC Verification library",
   "main": "dist/index.js",
