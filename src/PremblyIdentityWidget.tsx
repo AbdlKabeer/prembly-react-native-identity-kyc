@@ -93,8 +93,12 @@ export const PremblyIdentityWidget = ({
   const handleMessage = (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      if (data.event) {
-        switch (data.event) {
+      
+      // The web widget might send the event name in either `event` or `status` property
+      const eventName = data.event || data.status;
+      
+      if (eventName) {
+        switch (eventName) {
           case 'closed':
             callback({ status: 'closed' });
             break;
@@ -102,12 +106,18 @@ export const PremblyIdentityWidget = ({
             callback({ status: 'error', message: data.message });
             break;
           case 'verified':
+          case 'success':
             callback({ status: 'success', data: data });
             break;
           default:
-            console.warn('Received unknown event from WebView:', data.event);
+            console.warn('Received unknown event from WebView:', eventName);
+            // Forward unknown events to the callback so the developer can see them
+            callback({ status: eventName, data: data });
             break;
         }
+      } else {
+        // Fallback: just send the raw data back to the callback
+        callback({ status: 'unknown_payload', data: data });
       }
     } catch (e) {
       console.error('Error decoding JSON from WebView:', e);
