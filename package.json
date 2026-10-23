@@ -27,7 +27,8 @@
     "build": "bob build",
     "prepare": "bob build",
     "typecheck": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "example": "npm run --workspace prembly-react-native-kyc-example"
   },
   "keywords": [
     "react-native",
@@ -69,6 +70,9 @@
     "react-test-renderer": "19.2.3",
     "typescript": "^6.0.3"
   },
+  "workspaces": [
+    "example"
+  ],
   "react-native-builder-bob": {
     "source": "src",
     "output": "lib",
