@@ -1,6 +1,6 @@
 {
   "name": "prembly-react-native-kyc",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Prembly React Native SDK: the Identity KYC widget and Transaction Monitoring device signals, with a real device ID read from the phone",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",

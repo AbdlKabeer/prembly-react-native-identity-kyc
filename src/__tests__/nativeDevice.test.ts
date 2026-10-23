@@ -133,3 +133,14 @@ describe('buildNativeDeviceScript', () => {
     expect(run('https://evil.example.com')).toBeUndefined();
   });
 });
+
+describe('buildNativeDeviceScript origin', () => {
+  it('guards on the origin it is given', () => {
+    const script = buildNativeDeviceScript(
+      { version: 1, source: 'native', platform: 'ios', sdkVersion: '2', deviceId: 'd', deviceIdSource: 'ios_keychain', platformDeviceId: null, app: { appId: 'a', appVersion: '1', appBuild: '1' }, signals: {} } as never,
+      'https://hosted.example.com'
+    );
+    expect(script).toContain('window.location.origin === "https://hosted.example.com"');
+    expect(script).not.toContain(WIDGET_ORIGIN);
+  });
+});

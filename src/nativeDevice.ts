@@ -92,13 +92,17 @@ function safeJson(value: unknown): string {
 }
 
 /**
- * The script the WebView runs before the page loads. It sets the device data only when the page is
- * the Prembly widget, so a page the widget navigates to never receives it.
+ * The script the WebView runs before the page loads. It sets the device data only when the page's
+ * origin is exactly `origin` (the Prembly widget by default), so a page the widget navigates to
+ * never receives it.
  */
-export function buildNativeDeviceScript(data: NativeDeviceData): string {
+export function buildNativeDeviceScript(
+  data: NativeDeviceData,
+  origin: string = WIDGET_ORIGIN
+): string {
   return `(function () {
   try {
-    if (window.location.origin === ${safeJson(WIDGET_ORIGIN)}) {
+    if (window.location.origin === ${safeJson(origin)}) {
       window.__PREMBLY_NATIVE_DEVICE__ = ${safeJson(data)};
     }
   } catch (e) {}

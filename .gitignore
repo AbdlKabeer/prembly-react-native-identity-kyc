@@ -154,3 +154,6 @@ example/android/build/
 example/android/app/build/
 example/android/.gradle/
 example/.bundle/
+
+# Local workflow test values
+example/src/workflowConfig.local.ts

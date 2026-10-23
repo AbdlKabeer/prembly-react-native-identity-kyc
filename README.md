@@ -82,6 +82,37 @@ While the verification session is created, the library reads the phone and, befo
 - If the phone cannot be read (for example in Expo Go), the widget carries on with what the web page can see.
 - While the widget is open the library keeps checking whether the screen is being recorded or shared and tells the widget, including a recording that started and stopped.
 
+## Workflow
+
+Starts one of your compliance workflows with your public key, the same session the web SDK creates, and opens it in your app. The phone's real device ID and details go to the workflow before the page loads, so its device checks see the actual device.
+
+```tsx
+import { PremblyWorkflow } from 'prembly-react-native-kyc';
+
+<PremblyWorkflow
+  isVisible={isVisible}
+  publishableKey="test_pk_..."
+  workflowId="wf_123"
+  customer={{ firstName: 'John', lastName: 'Doe', email: 'john@example.com' }}
+  onEvent={(e) => console.log(e.type)}
+  callback={(result) => {
+    // completed | failed | manual_review | expired | cancelled, or failed with `error` if it could not start
+    setIsVisible(false);
+  }}
+/>
+```
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `isVisible` | `boolean` | Yes | Shows or hides the workflow modal |
+| `publishableKey` | `string` | Yes | `live_pk_...` or `test_pk_...`. Secret keys are refused |
+| `workflowId` | `string` | Yes | The workflow to run |
+| `customer` | `{ firstName, lastName, email, phone?, reference? }` | Yes | The person going through it |
+| `metadata`, `redirectUrl`, `baseUrl` | | No | Extra session data, a redirect, a server override |
+| `collectDeviceData` | `boolean` | No | Give the phone's device data to the workflow. **On by default** |
+| `onEvent` | `function` | No | `{ type, sessionId, nodeId? }` for every event. No personal data |
+| `callback` | `function` | Yes | Called once when the flow ends. `cancelled` carries `lastEvent`; `processing` means the checks carry on in the background |
+
 ## Transaction Monitoring
 
 ```ts
@@ -165,6 +196,7 @@ Not collected: advertising ID, IMEI, MAC address, serial number, contacts, messa
 
 ## Changelog
 
+- **2.0.1:** new `PremblyWorkflow` component: starts one of your workflows with your public key, opens it in your app, and gives it the phone's real device ID and details. Optional `metadata`, `redirectUrl`, `hostedUrl`.
 - **2.0.0:** the library now serves both the Identity KYC widget and Transaction Monitoring. The widget reads the phone's real device ID and details and hands them to the verification page. Screen recording is detected on iOS and on Android 15 and later, and watched while the widget is open. Requires a native build with the New Architecture.
 - **1.0.2:** widget callback fix.
 

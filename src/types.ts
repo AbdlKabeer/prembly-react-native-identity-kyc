@@ -67,3 +67,44 @@ export interface AppInfo {
   appVersion: string;
   appBuild: string;
 }
+
+export interface WorkflowCustomer {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  reference?: string;
+}
+
+export type WorkflowErrorCode =
+  | 'invalid_key'
+  | 'invalid_request'
+  | 'unauthorised'
+  | 'not_found'
+  | 'rate_limited'
+  | 'server_error'
+  | 'network_error'
+  | 'timeout';
+
+export interface WorkflowSessionInfo {
+  sessionId: string;
+  /** The hosted app's link, `<hosted>/?session=<id>`. */
+  link: string;
+  expiresAt?: string;
+  isSandbox?: boolean;
+}
+
+/** An event the hosted workflow reports. No personal data. */
+export interface WorkflowEvent {
+  type: string;
+  sessionId: string;
+  nodeId?: string;
+}
+
+export type WorkflowEnd = 'completed' | 'failed' | 'manual_review' | 'expired';
+
+export type WorkflowResult =
+  | { status: WorkflowEnd; sessionId: string }
+  /** Closed before an end state. `lastEvent` of `processing` means checks continue in the background. */
+  | { status: 'cancelled'; sessionId: string; lastEvent?: string }
+  | { status: 'failed'; sessionId?: undefined; error: { code: WorkflowErrorCode; message: string } };
