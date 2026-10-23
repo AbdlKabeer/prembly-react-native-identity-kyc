@@ -1,33 +1,98 @@
 {
   "name": "prembly-react-native-kyc",
-  "version": "1.0.2",
-  "description": "React Native Identity KYC Verification library",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "2.0.0",
+  "description": "Prembly React Native SDK: the Identity KYC widget and Transaction Monitoring device signals, with a real device ID read from the phone",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "prembly-react-native-kyc-source": "./src/index.ts",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "*.podspec",
+    "!ios/build",
+    "!android/build",
+    "!**/__tests__",
+    "!**/.*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "prepack": "npm run build"
+    "build": "bob build",
+    "prepare": "bob build",
+    "typecheck": "tsc",
+    "test": "jest"
   },
   "keywords": [
     "react-native",
     "prembly",
     "kyc",
-    "identity"
+    "identity",
+    "fraud",
+    "device"
   ],
   "author": "Prembly",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbdlKabeer/prembly-react-native-identity-kyc.git"
+  },
+  "homepage": "https://github.com/AbdlKabeer/prembly-react-native-identity-kyc#readme",
+  "bugs": {
+    "url": "https://github.com/AbdlKabeer/prembly-react-native-identity-kyc/issues"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-native": ">=0.70.0",
-    "react-native-webview": ">=11.0.0"
+    "react": "*",
+    "react-native": ">=0.76.0",
+    "react-native-webview": ">=13.0.0"
   },
   "devDependencies": {
-    "react": "^18.2.0",
-    "react-native": "^0.74.0",
-    "react-native-webview": "^13.10.0",
-    "@types/react": "^18.2.0",
-    "@types/react-native": "^0.72.0",
-    "typescript": "^5.0.0"
+    "@react-native/babel-preset": "0.86.2",
+    "@react-native/jest-preset": "0.86.2",
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.2.0",
+    "jest": "^30.5.2",
+    "react": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-builder-bob": "^0.43.1",
+    "react-native-webview": "^13.16.0",
+    "react-test-renderer": "19.2.3",
+    "typescript": "^6.0.3"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  },
+  "codegenConfig": {
+    "name": "PremblyDeviceSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.prembly.device"
+    }
+  }
 }

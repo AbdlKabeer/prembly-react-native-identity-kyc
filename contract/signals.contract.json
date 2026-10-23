@@ -1,0 +1,96 @@
+{
+  "note": "The signal keys each native collector sends today. Used by src/__tests__/wire-contract.test.ts so a key cannot be added, renamed or dropped without this file (and the backend) changing with it.",
+  "sections": [
+    "device",
+    "integrity",
+    "network",
+    "scam_signals",
+    "location"
+  ],
+  "android": {
+    "device": [
+      "type",
+      "model",
+      "manufacturer",
+      "os_name",
+      "os_version",
+      "app_version",
+      "app_build",
+      "locale",
+      "timezone",
+      "platform_device_id",
+      "total_memory_mb",
+      "cpu_cores",
+      "screen_width",
+      "screen_height",
+      "screen_density",
+      "brand",
+      "sdk_int",
+      "security_patch"
+    ],
+    "integrity": [
+      "is_rooted",
+      "is_emulator",
+      "is_debugger_attached",
+      "developer_options_enabled",
+      "usb_debugging_enabled",
+      "is_device_secure"
+    ],
+    "network": [
+      "type",
+      "is_vpn_active",
+      "is_proxy_configured"
+    ],
+    "scam_signals": [
+      "is_screen_shared_or_recorded",
+      "remote_access_app_running",
+      "remote_access_app_installed"
+    ],
+    "location": [
+      "lat",
+      "lng",
+      "accuracy_m",
+      "is_mock"
+    ]
+  },
+  "ios": {
+    "device": [
+      "type",
+      "model",
+      "manufacturer",
+      "os_name",
+      "os_version",
+      "app_version",
+      "app_build",
+      "locale",
+      "timezone",
+      "platform_device_id",
+      "total_memory_mb",
+      "cpu_cores",
+      "screen_width",
+      "screen_height",
+      "screen_density"
+    ],
+    "integrity": [
+      "is_rooted",
+      "is_emulator",
+      "is_debugger_attached",
+      "is_device_secure"
+    ],
+    "network": [
+      "type",
+      "is_vpn_active",
+      "is_proxy_configured"
+    ],
+    "scam_signals": [
+      "is_screen_shared_or_recorded",
+      "remote_access_app_running"
+    ],
+    "location": [
+      "lat",
+      "lng",
+      "accuracy_m",
+      "is_mock"
+    ]
+  }
+}

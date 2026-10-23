@@ -1,0 +1,32 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Normal permission (no prompt): lets the SDK see whether a VPN or proxy is active. -->
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+  <!--
+    Normal permission (no prompt), Android 15 and later: lets the SDK ask the system whether the
+    screen is being recorded while a verification is open. Without it the SDK falls back to
+    looking for a cast or mirrored display.
+  -->
+  <uses-permission android:name="android.permission.DETECT_SCREEN_RECORDING" />
+
+  <!--
+    Package visibility (Android 11+) for the packages the SDK checks by name. This lists specific
+    packages only; the SDK does not use QUERY_ALL_PACKAGES. The list is reviewed by the security
+    team before release: see RemoteAccessApps.kt and the README.
+  -->
+  <queries>
+    <package android:name="com.topjohnwu.magisk" />
+    <package android:name="eu.chainfire.supersu" />
+    <package android:name="com.koushikdutta.superuser" />
+    <package android:name="com.noshufou.android.su" />
+    <package android:name="me.weishu.kernelsu" />
+    <package android:name="com.anydesk.anydeskandroid" />
+    <package android:name="com.anydesk.adcontrol.ad1" />
+    <package android:name="com.teamviewer.teamviewer.market.mobile" />
+    <package android:name="com.teamviewer.quicksupport.market" />
+    <package android:name="com.teamviewer.host.market" />
+    <package android:name="com.carriez.flutter_hbb" />
+    <package android:name="com.sand.airdroid" />
+    <package android:name="com.sand.airmirror" />
+  </queries>
+</manifest>

@@ -1,6 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  type ComponentProps,
+  type ComponentType,
+  type Ref,
+} from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Modal, TouchableOpacity, SafeAreaView } from 'react-native';
-import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import {
+  buildNativeDeviceScript,
+  collectNativeDevice,
+  WIDGET_ORIGIN,
+  type NativeDeviceData,
+} from './nativeDevice';
+import { buildScreenUpdateScript, startScreenWatch } from './screenWatch';
+
+// react-native-webview's types do not expose the WebView's methods or accept a ref, though the
+// component does. Describe the one method used here and type the component to accept the ref.
+interface WebViewHandle {
+  injectJavaScript: (script: string) => void;
+}
+const WebViewWithRef = WebView as unknown as ComponentType<
+  ComponentProps<typeof WebView> & { ref?: Ref<WebViewHandle> }
+>;
 
 export interface PremblyIdentityWidgetProps {
   isVisible: boolean;
@@ -11,6 +34,12 @@ export interface PremblyIdentityWidgetProps {
   firstName?: string;
   lastName?: string;
   metadata?: Record<string, any>;
+  /**
+   * Read the phone's own device ID and details and give them to the widget, so the check sees the
+   * real device and not a guess from the browser. On by default. If the phone cannot be read the
+   * widget carries on with what the web page can see. No permission is asked for.
+   */
+  collectDeviceData?: boolean;
   callback: (response: any) => void;
 }
 
@@ -23,9 +52,12 @@ export const PremblyIdentityWidget = ({
   firstName = '',
   lastName = '',
   metadata = {},
+  collectDeviceData = true,
   callback,
 }: PremblyIdentityWidgetProps) => {
   const [webViewUrl, setWebViewUrl] = useState<string | null>(null);
+  const [nativeDevice, setNativeDevice] = useState<NativeDeviceData | null>(null);
+  const webViewRef = useRef<WebViewHandle>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -34,16 +66,36 @@ export const PremblyIdentityWidget = ({
       initializePremblyWidget();
     } else {
       setWebViewUrl(null);
+      setNativeDevice(null);
       setIsLoading(true);
       setErrorMessage(null);
     }
   }, [isVisible]);
+
+  // While the widget is on screen, keep asking the phone whether the screen is being recorded or
+  // shared and tell the page. A recording started after the first read, even one that stops again,
+  // still reaches the verification. Nothing is asked of the person and nothing is shown.
+  useEffect(() => {
+    if (!isVisible || !webViewUrl || !nativeDevice) return;
+    return startScreenWatch(
+      (state) => webViewRef.current?.injectJavaScript(buildScreenUpdateScript(state)),
+      {
+        alreadySeen:
+          nativeDevice.signals.scam_signals?.is_screen_shared_or_recorded === true,
+      }
+    );
+  }, [isVisible, webViewUrl, nativeDevice]);
 
   const initializePremblyWidget = async () => {
     setIsLoading(true);
     setErrorMessage(null);
 
     const apiUrl = 'https://api.prembly.com/api/v1/checker-widget/sdk/sessions/initiate/';
+
+    // Read the phone while the session is being created. It never fails and is time-limited.
+    const devicePromise: Promise<NativeDeviceData | null> = collectDeviceData
+      ? collectNativeDevice()
+      : Promise.resolve(null);
 
     const requestBody = {
       first_name: firstName,
@@ -69,7 +121,8 @@ export const PremblyIdentityWidget = ({
         const responseData = await response.json();
         if (responseData.status === true && responseData.data) {
           const sessionId = responseData.data.session.session_id;
-          setWebViewUrl(`https://sdk-live.prembly.com/?session=${sessionId}`);
+          setNativeDevice(await devicePromise);
+          setWebViewUrl(`${WIDGET_ORIGIN}/?session=${sessionId}`);
         } else {
           const errorMsg = responseData.detail || 'Failed to get widget ID from API.';
           setErrorMessage(errorMsg);
@@ -146,9 +199,14 @@ export const PremblyIdentityWidget = ({
             </TouchableOpacity>
           </View>
         ) : (
-          <WebView
+          <WebViewWithRef
+            ref={webViewRef}
             source={{ uri: webViewUrl! }}
             onMessage={handleMessage}
+            // Runs before the page does, and only hands the data to the Prembly widget origin.
+            injectedJavaScriptBeforeContentLoaded={
+              nativeDevice ? buildNativeDeviceScript(nativeDevice) : undefined
+            }
             injectedJavaScript={`
               window.addEventListener("message", (event) => {
                 window.ReactNativeWebView.postMessage(JSON.stringify(event.data));
