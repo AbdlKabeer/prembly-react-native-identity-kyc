@@ -163,7 +163,7 @@ export const PremblyWorkflow = ({
   useEffect(() => {
     if (!isVisible || !session || !nativeDevice) return;
     return startScreenWatch(
-      (state) => webViewRef.current?.injectJavaScript(buildScreenUpdateScript(state)),
+      (state) => webViewRef.current?.injectJavaScript(buildScreenUpdateScript(state, originOf(session.link))),
       { alreadySeen: nativeDevice.signals.scam_signals?.is_screen_shared_or_recorded === true }
     );
   }, [isVisible, session, nativeDevice]);
