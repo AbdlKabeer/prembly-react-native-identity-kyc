@@ -24,7 +24,7 @@
     "!**/.*"
   ],
   "scripts": {
-    "build": "bob build",
+    "build": "node api.js && bob build",
     "prepare": "bob build",
     "typecheck": "tsc",
     "test": "jest",
