@@ -172,6 +172,13 @@ export const PremblyWorkflow = ({
     const parsed = parseWorkflowMessage(event.nativeEvent.data);
     // Only this session's events count; a message about another session is ignored.
     if (!parsed || !session || parsed.sessionId !== session.sessionId) return;
+    // The person cancelled from the widget's own Cancel button: close the flow the way the app's
+    // Close button does. This is checked first so `lastEvent` is still what came before it.
+    if (parsed.type === 'cancelled') {
+      latest.current.onEvent?.(parsed);
+      close();
+      return;
+    }
     lastEvent.current = parsed.type;
     latest.current.onEvent?.(parsed);
     if (isEndState(parsed.type)) {

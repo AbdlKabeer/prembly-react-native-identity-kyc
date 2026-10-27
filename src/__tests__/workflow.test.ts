@@ -89,6 +89,12 @@ describe('parseWorkflowMessage', () => {
       parseWorkflowMessage(JSON.stringify({ source: 'prembly-sdk', product: 'tm', type: 'x', session_id: 's' }))
     ).toBeNull();
   });
+  it('reads the widget\'s cancel, which is not an end state', () => {
+    // The widget's own Cancel button posts this; the component closes the flow on it.
+    const message = JSON.stringify({ source: 'prembly-workflow-sdk', type: 'cancelled', session_id: 's' });
+    expect(parseWorkflowMessage(message)).toEqual({ type: 'cancelled', sessionId: 's' });
+    expect(isEndState('cancelled')).toBe(false);
+  });
   it('knows the end states', () => {
     expect(['completed', 'failed', 'manual_review', 'expired'].every(isEndState)).toBe(true);
     expect(isEndState('processing')).toBe(false);
