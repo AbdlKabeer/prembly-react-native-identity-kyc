@@ -1,0 +1,21 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/native-device-and-tm",
+    "feat/widget-cancel",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "feat/native-device-and-tm": "main",
+    "feat/widget-cancel": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "feat/native-device-and-tm",
+    "feat/widget-cancel",
+    "origin"
+  ]
+}
