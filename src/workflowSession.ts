@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import type {
   WorkflowCustomer,
   WorkflowErrorCode,
+  WorkflowPrefill,
   WorkflowSessionInfo,
 } from './types';
 import { SDK_VERSION } from './version';
@@ -27,6 +28,7 @@ export interface CreateWorkflowSessionOptions {
   workflowId: string;
   customer: WorkflowCustomer;
   metadata?: Record<string, unknown>;
+  prefill?: WorkflowPrefill;
   redirectUrl?: string;
   baseUrl?: string;
   timeoutMs?: number;
@@ -34,6 +36,44 @@ export interface CreateWorkflowSessionOptions {
 
 const nonEmpty = (value: unknown): value is string =>
   typeof value === 'string' && value.trim() !== '';
+
+// The field the app uses, and the name the backend knows the ID by.
+const PREFILL_FIELDS: ReadonlyArray<readonly [keyof WorkflowPrefill, string]> = [
+  ['nin', 'nin'],
+  ['bvn', 'bvn'],
+  ['passport', 'passport'],
+  ['driversLicense', 'drivers_license'],
+  ['votersCard', 'voters_card'],
+];
+
+/** The IDs given, as [name the backend knows it by, number]. Blank counts as not given. */
+export function prefillGiven(prefill: WorkflowPrefill): Array<[string, string]> {
+  const given: Array<[string, string]> = [];
+  for (const [field, name] of PREFILL_FIELDS) {
+    const value = prefill[field];
+    if (nonEmpty(value)) given.push([name, value.trim()]);
+  }
+  return given;
+}
+
+/**
+ * The metadata sent with the session: yours, plus the prefill in the form the backend picks up
+ * (`{ prefill: true, channel_code: 'bvn', bvn: '<number>' }`). The prefill wins over any of those
+ * keys already in your metadata; everything else of yours is kept, and your object is not changed.
+ */
+export function workflowMetadata(
+  options: Pick<CreateWorkflowSessionOptions, 'metadata' | 'prefill'>
+): Record<string, unknown> {
+  const metadata: Record<string, unknown> = { ...options.metadata };
+  const given = options.prefill != null ? prefillGiven(options.prefill)[0] : undefined;
+  if (given) {
+    const [name, number] = given;
+    metadata.prefill = true;
+    metadata.channel_code = name;
+    metadata[name] = number;
+  }
+  return metadata;
+}
 
 function validate(options: CreateWorkflowSessionOptions): void {
   const key = (options.publishableKey ?? '').trim();
@@ -52,6 +92,9 @@ function validate(options: CreateWorkflowSessionOptions): void {
   }
   if (!nonEmpty(c.email) || !EMAIL_RE.test(c.email)) {
     throw invalid('customer.email must be a valid email.');
+  }
+  if (options.prefill != null && prefillGiven(options.prefill).length !== 1) {
+    throw invalid('prefill needs exactly one ID: nin, bvn, passport, driversLicense or votersCard.');
   }
 }
 
@@ -82,7 +125,7 @@ export async function createWorkflowSession(
       ...(c.phone !== undefined ? { phone: c.phone } : {}),
       ...(c.reference !== undefined ? { reference: c.reference } : {}),
     },
-    metadata: options.metadata ?? {},
+    metadata: workflowMetadata(options),
     ...(options.redirectUrl !== undefined ? { redirect_url: options.redirectUrl } : {}),
   };
 

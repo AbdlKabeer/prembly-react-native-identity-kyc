@@ -1,4 +1,9 @@
-import { createWorkflowSession, PremblyWorkflowError } from '../workflowSession';
+import {
+  createWorkflowSession,
+  PremblyWorkflowError,
+  prefillGiven,
+  workflowMetadata,
+} from '../workflowSession';
 import { isEndState, parseWorkflowMessage } from '../workflowEvents';
 
 const customer = { firstName: 'Ada', lastName: 'Obi', email: 'ada@example.com' };
@@ -98,5 +103,103 @@ describe('parseWorkflowMessage', () => {
   it('knows the end states', () => {
     expect(['completed', 'failed', 'manual_review', 'expired'].every(isEndState)).toBe(true);
     expect(isEndState('processing')).toBe(false);
+  });
+});
+
+describe('prefill', () => {
+  const created = {
+    status: true,
+    data: { session_id: 'wf_session_1', link: 'https://sdk-live.prembly.com/?session=wf_session_1' },
+  };
+  const sent = async (extra: Record<string, unknown>) => {
+    const fetchMock = respond(201, created);
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    await createWorkflowSession({ ...base, ...extra });
+    return JSON.parse(fetchMock.mock.calls[0][1].body);
+  };
+
+  it('goes in the metadata the way the backend picks it up, with your own data kept', async () => {
+    const body = await sent({ prefill: { bvn: '22212345678' }, metadata: { order: 'A1' } });
+    expect(body.metadata).toEqual({
+      order: 'A1',
+      prefill: true,
+      channel_code: 'bvn',
+      bvn: '22212345678',
+    });
+  });
+
+  it('is not sent as a top-level field, which a public key is refused', async () => {
+    const body = await sent({ prefill: { nin: '12345678901' } });
+    expect(body).not.toHaveProperty('prefill');
+  });
+
+  it.each([
+    ['nin', { nin: '11111111111' }, '11111111111'],
+    ['bvn', { bvn: '11111111111' }, '11111111111'],
+    ['passport', { passport: 'A1234567' }, 'A1234567'],
+    ['drivers_license', { driversLicense: 'ABC12345' }, 'ABC12345'],
+    ['voters_card', { votersCard: '90F5B0' }, '90F5B0'],
+  ])('%s is sent under the name the backend knows it by', async (name, prefill, number) => {
+    const { metadata } = await sent({ prefill });
+    expect(metadata.prefill).toBe(true);
+    expect(metadata.channel_code).toBe(name);
+    expect(metadata[name]).toBe(number);
+  });
+
+  it('trims the number', async () => {
+    const { metadata } = await sent({ prefill: { nin: '  12345678901 \n' } });
+    expect(metadata.nin).toBe('12345678901');
+  });
+
+  it('wins over the same keys in your metadata, and your other keys stay', async () => {
+    const { metadata } = await sent({
+      prefill: { bvn: '22212345678' },
+      metadata: { prefill: false, channel_code: 'nin', bvn: 'old', order: 'A1' },
+    });
+    expect(metadata).toEqual({
+      prefill: true,
+      channel_code: 'bvn',
+      bvn: '22212345678',
+      order: 'A1',
+    });
+  });
+
+  it('does not change the object you passed in', () => {
+    const yours = { order: 'A1' };
+    workflowMetadata({ metadata: yours, prefill: { nin: '12345678901' } });
+    expect(yours).toEqual({ order: 'A1' });
+  });
+
+  it('leaves the metadata exactly as given without it', async () => {
+    expect((await sent({ metadata: { a: 1 } })).metadata).toEqual({ a: 1 });
+    expect((await sent({})).metadata).toEqual({});
+  });
+
+  it.each([
+    ['none given', {}],
+    ['a blank one', { bvn: '   ' }],
+    ['two given', { nin: '12345678901', bvn: '22212345678' }],
+  ])('is refused before any request when %s', async (_name, prefill) => {
+    globalThis.fetch = jest.fn() as unknown as typeof fetch;
+    await expect(createWorkflowSession({ ...base, prefill })).rejects.toMatchObject({
+      code: 'invalid_request',
+      message: expect.stringContaining('exactly one ID'),
+    });
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('never shows the number in an error', async () => {
+    globalThis.fetch = respond(400, { status: false, message: 'bad' }) as unknown as typeof fetch;
+    const error = await createWorkflowSession({ ...base, prefill: { bvn: '22212345678' } }).catch(
+      (e) => e
+    );
+    expect(error).toBeInstanceOf(PremblyWorkflowError);
+    expect(String(error.message)).not.toContain('22212345678');
+  });
+
+  it('lists what was given by backend name', () => {
+    expect(prefillGiven({ driversLicense: 'X1', votersCard: ' ', nin: '' })).toEqual([
+      ['drivers_license', 'X1'],
+    ]);
   });
 });

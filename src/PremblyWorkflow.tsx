@@ -28,6 +28,7 @@ import { buildScreenUpdateScript, startScreenWatch } from './screenWatch';
 import type {
   WorkflowCustomer,
   WorkflowEvent,
+  WorkflowPrefill,
   WorkflowResult,
   WorkflowSessionInfo,
 } from './types';
@@ -67,6 +68,13 @@ export interface PremblyWorkflowProps {
   workflowId: string;
   customer: WorkflowCustomer;
   metadata?: Record<string, unknown>;
+  /**
+   * An ID you already have for the person (`{ bvn: '...' }`, or `nin`, `passport`, `driversLicense`,
+   * `votersCard`; exactly one): they skip the ID screen. It travels in the session's `metadata`, so
+   * whoever can read what the app sends could change it; for an ID that must not be changeable,
+   * create the session from your server with a secret key.
+   */
+  prefill?: WorkflowPrefill;
   redirectUrl?: string;
   /** Override the API base URL (for example for a staging server). */
   baseUrl?: string;
@@ -92,6 +100,7 @@ export const PremblyWorkflow = ({
   workflowId,
   customer,
   metadata,
+  prefill,
   redirectUrl,
   baseUrl,
   hostedUrl,
@@ -107,8 +116,11 @@ export const PremblyWorkflow = ({
   const lastEvent = useRef<string | undefined>(undefined);
   const ended = useRef(false);
   // Props change on every render; the handlers read the latest without restarting the session.
-  const latest = useRef({ callback, onEvent });
-  latest.current = { callback, onEvent };
+  // The details of the person and the prefill are read here too, when the session starts: the
+  // function that starts it is not rebuilt when they change, and an ID typed after the first render
+  // must not be lost.
+  const latest = useRef({ callback, onEvent, customer, metadata, prefill });
+  latest.current = { callback, onEvent, customer, metadata, prefill };
 
   const finish = useCallback((result: WorkflowResult) => {
     if (ended.current) return;
@@ -122,11 +134,13 @@ export const PremblyWorkflow = ({
     // Read the phone while the session is created. It never fails and is time-limited.
     const devicePromise = collectDeviceData ? collectNativeDevice() : Promise.resolve(null);
     try {
+      const current = latest.current;
       const created = await createWorkflowSession({
         publishableKey,
         workflowId,
-        customer,
-        metadata,
+        customer: current.customer,
+        metadata: current.metadata,
+        prefill: current.prefill,
         redirectUrl,
         baseUrl,
       });

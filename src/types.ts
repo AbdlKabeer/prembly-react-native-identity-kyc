@@ -76,6 +76,21 @@ export interface WorkflowCustomer {
   reference?: string;
 }
 
+/**
+ * An ID you already have for the person, so they do not have to enter it. Give exactly one.
+ *
+ * The person skips the ID screen and goes straight to their next step. The ID is sent in the
+ * session's `metadata`, so whoever can read what the app sends could change it. When the ID must
+ * not be changeable, start the session from your server with a secret key instead.
+ */
+export interface WorkflowPrefill {
+  nin?: string;
+  bvn?: string;
+  passport?: string;
+  driversLicense?: string;
+  votersCard?: string;
+}
+
 export type WorkflowErrorCode =
   | 'invalid_key'
   | 'invalid_request'

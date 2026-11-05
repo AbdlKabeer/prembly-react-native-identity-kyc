@@ -94,6 +94,8 @@ import { PremblyWorkflow } from 'prembly-react-native-kyc';
   publishableKey="test_pk_..."
   workflowId="wf_123"
   customer={{ firstName: 'John', lastName: 'Doe', email: 'john@example.com' }}
+  // Optional: an ID you already have, so they skip the ID screen
+  prefill={{ bvn: '22212345678' }}
   onEvent={(e) => console.log(e.type)}
   callback={(result) => {
     // completed | failed | manual_review | expired | cancelled, or failed with `error` if it could not start
@@ -108,10 +110,25 @@ import { PremblyWorkflow } from 'prembly-react-native-kyc';
 | `publishableKey` | `string` | Yes | `live_pk_...` or `test_pk_...`. Secret keys are refused |
 | `workflowId` | `string` | Yes | The workflow to run |
 | `customer` | `{ firstName, lastName, email, phone?, reference? }` | Yes | The person going through it |
+| `prefill` | `{ nin?, bvn?, passport?, driversLicense?, votersCard? }` | No | An ID you already have, **exactly one**. The person skips the ID screen. See below |
 | `metadata`, `redirectUrl`, `baseUrl` | | No | Extra session data, a redirect, a server override |
 | `collectDeviceData` | `boolean` | No | Give the phone's device data to the workflow. **On by default** |
 | `onEvent` | `function` | No | `{ type, sessionId, nodeId? }` for every event. No personal data |
 | `callback` | `function` | Yes | Called once when the flow ends. `cancelled` carries `lastEvent`; `processing` means the checks carry on in the background |
+
+### Prefill an ID
+
+If you already know the person's ID, pass it and they skip the ID screen and go straight to their next step (for example the selfie):
+
+```tsx
+<PremblyWorkflow ... prefill={{ nin: '12345678901' }} />
+```
+
+- Give exactly one of `nin`, `bvn`, `passport`, `driversLicense`, `votersCard`. Anything else fails before a request is made, with `invalid_request`.
+- The workflow's identity step must offer that ID type. If it does not, the ID is ignored and the person is asked for it as usual.
+- It travels in the session's `metadata` (`{ prefill: true, channel_code: 'bvn', bvn: '...' }`), which is what a public key can send. **Anyone who can read what your app sends could change it.** When the ID must not be changeable, create the session from your server with a secret key and the `prefill` field instead, and open the link it returns.
+- The ID is stored encrypted by Prembly and is not kept in the session's metadata. The library never logs it.
+- The `customer`, `metadata` and `prefill` you pass are read when the workflow opens, so an ID typed after the screen first rendered is used.
 
 ## Transaction Monitoring
 
@@ -196,6 +213,7 @@ Not collected: advertising ID, IMEI, MAC address, serial number, contacts, messa
 
 ## Changelog
 
+- **2.0.2:** new `prefill` prop on `PremblyWorkflow`: pass an ID you already have (`nin`, `bvn`, `passport`, `driversLicense` or `votersCard`, exactly one) and the person skips the ID screen. `customer`, `metadata` and `prefill` are now read when the workflow opens, not when the component first renders.
 - **2.0.1:** new `PremblyWorkflow` component: starts one of your workflows with your public key, opens it in your app, and gives it the phone's real device ID and details. Optional `metadata`, `redirectUrl`, `hostedUrl`.
 - **2.0.0:** the library now serves both the Identity KYC widget and Transaction Monitoring. The widget reads the phone's real device ID and details and hands them to the verification page. Screen recording is detected on iOS and on Android 15 and later, and watched while the widget is open. Requires a native build with the New Architecture.
 - **1.0.2:** widget callback fix.
