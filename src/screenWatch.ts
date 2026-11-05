@@ -66,11 +66,14 @@ export function startScreenWatch(
  * the data, and it tells the page (a `prembly:native-device-update` event) only when something
  * changed.
  */
-export function buildScreenUpdateScript(state: ScreenCaptureState): string {
+export function buildScreenUpdateScript(
+  state: ScreenCaptureState,
+  origin: string = WIDGET_ORIGIN
+): string {
   return `(function () {
   try {
     var device = window.__PREMBLY_NATIVE_DEVICE__;
-    if (window.location.origin !== ${JSON.stringify(WIDGET_ORIGIN)} || !device) return;
+    if (window.location.origin !== ${JSON.stringify(origin)} || !device) return;
     var signals = (device.signals = device.signals || {});
     var scam = (signals.scam_signals = signals.scam_signals || {});
     var changed =
