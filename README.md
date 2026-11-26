@@ -172,7 +172,7 @@ A session is reused until shortly before it expires (about 15 minutes). If it ca
 | Section | Signals |
 |---|---|
 | `device` | Type, model, manufacturer, OS and version, app version and build, language, timezone, memory, CPU cores, screen size and density. Android also: brand, SDK level, security patch. |
-| `integrity` | Rooted or jailbroken, emulator or simulator, debugger attached, screen lock set. Android also: developer options, USB debugging. |
+| `integrity` | Rooted or jailbroken, emulator or simulator, debugger attached, hooking framework detected (Frida, Xposed, LSPosed, Substrate), screen lock set. Android also: developer options, USB debugging. |
 | `network` | Connection type, VPN active, proxy configured |
 | `scam_signals` | Screen shared or recorded; on Android, a known remote-access app's accessibility service enabled, and whether one is installed |
 | `location` | Latitude, longitude, accuracy and whether it is mocked. **Only for Transaction Monitoring, and only when you turn it on**, and the app already holds the permission. |
@@ -195,7 +195,7 @@ Not collected: advertising ID, IMEI, MAC address, serial number, contacts, messa
 ## Limits to know about
 
 - Signals the app reports can be faked by a modified app. Treat them as evidence for scoring and review. Platform attestation (Play Integrity, App Attest) is not in this version.
-- Root, jailbreak and emulator detection is best effort. Android emulators that imitate a real phone's model can be missed, and iOS detects the Apple Simulator only.
+- Root, jailbreak, emulator and hooking detection is best effort. `hooking_framework_detected: true` is strong evidence; `false` is not proof. Android emulators that imitate a real phone's model can be missed, and iOS detects the Apple Simulator only.
 - iOS cannot see which other apps are running, so `remote_access_app_running` is always `false` there.
 - Screen recording: iOS reports recording, mirroring and AirPlay. Android 15 and later reports recording through the system. Older Android only sees a cast or mirrored display.
 - A simulator or emulator reports its host machine's memory and CPU cores.
@@ -213,6 +213,7 @@ Not collected: advertising ID, IMEI, MAC address, serial number, contacts, messa
 
 ## Changelog
 
+- **2.0.3:** `integrity.hooking_framework_detected` on Android and iOS (Frida, Xposed, LSPosed, Substrate). On iOS a hooked device no longer sets `is_rooted`; it sets this flag instead.
 - **2.0.2:** new `prefill` prop on `PremblyWorkflow`: pass an ID you already have (`nin`, `bvn`, `passport`, `driversLicense` or `votersCard`, exactly one) and the person skips the ID screen. `customer`, `metadata` and `prefill` are now read when the workflow opens, not when the component first renders.
 - **2.0.1:** new `PremblyWorkflow` component: starts one of your workflows with your public key, opens it in your app, and gives it the phone's real device ID and details. Optional `metadata`, `redirectUrl`, `hostedUrl`.
 - **2.0.0:** the library now serves both the Identity KYC widget and Transaction Monitoring. The widget reads the phone's real device ID and details and hands them to the verification page. Screen recording is detected on iOS and on Android 15 and later, and watched while the widget is open. Requires a native build with the New Architecture.

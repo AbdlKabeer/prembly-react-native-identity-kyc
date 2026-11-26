@@ -110,6 +110,7 @@ internal class SignalCollector(private val context: Context) {
       .put("is_rooted", isRooted())
       .put("is_emulator", isEmulator())
       .put("is_debugger_attached", Debug.isDebuggerConnected() || Debug.waitingForDebugger())
+      .put("hooking_framework_detected", HookDetection.isHookingFrameworkDetected())
       .put("developer_options_enabled", globalSetting(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED))
       .put("usb_debugging_enabled", globalSetting(Settings.Global.ADB_ENABLED))
       .put("is_device_secure", keyguard?.isDeviceSecure ?: true)

@@ -7,7 +7,12 @@
 #import <TargetConditionals.h>
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
+#import <errno.h>
+#import <fcntl.h>
 #import <netinet/in.h>
+#import <string.h>
+#import <sys/select.h>
+#import <sys/socket.h>
 #import <sys/sysctl.h>
 #import <unistd.h>
 
@@ -165,9 +170,15 @@
     return YES;
   }
 
-  // Hooking and injection libraries loaded into this process.
-  NSArray<NSString *> *markers = @[ @"MobileSubstrate", @"Substrate", @"FridaGadget", @"cynject",
-                                    @"libcycript", @"SSLKillSwitch" ];
+  return NO;
+}
+
+// Hooking and injection libraries loaded into this process (Frida, Substrate, Cycript...). Reported
+// separately from jailbreak: an injected library is strong evidence on its own, and it can be
+// present on a device that passes every jailbreak file check.
++ (BOOL)isHookingFrameworkDetected {
+  NSArray<NSString *> *markers = @[ @"MobileSubstrate", @"Substrate", @"FridaGadget", @"frida",
+                                    @"cynject", @"libcycript", @"SSLKillSwitch", @"libhooker" ];
   uint32_t count = _dyld_image_count();
   for (uint32_t i = 0; i < count; i++) {
     const char *name = _dyld_get_image_name(i);
@@ -181,7 +192,41 @@
       }
     }
   }
-  return NO;
+
+  // The default frida-server port, open on localhost.
+  return [self isLocalPortOpen:27042];
+}
+
++ (BOOL)isLocalPortOpen:(uint16_t)port {
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
+    return NO;
+  }
+  struct sockaddr_in addr;
+  memset(&addr, 0, sizeof(addr));
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  // Non-blocking connect with a short wait, so the check never stalls signal collection.
+  fcntl(sock, F_SETFL, O_NONBLOCK);
+  BOOL open = NO;
+  int result = connect(sock, (struct sockaddr *)&addr, sizeof(addr));
+  if (result == 0) {
+    open = YES;
+  } else if (errno == EINPROGRESS) {
+    fd_set writeSet;
+    FD_ZERO(&writeSet);
+    FD_SET(sock, &writeSet);
+    struct timeval timeout = {0, 100000};
+    if (select(sock + 1, NULL, &writeSet, NULL, &timeout) > 0) {
+      int error = 0;
+      socklen_t length = sizeof(error);
+      getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &length);
+      open = (error == 0);
+    }
+  }
+  close(sock);
+  return open;
 }
 
 + (BOOL)hasDeviceLock {
@@ -195,6 +240,7 @@
     @"is_rooted" : @([self isJailbroken]),
     @"is_emulator" : @([self isSimulator]),
     @"is_debugger_attached" : @([self isDebuggerAttached]),
+    @"hooking_framework_detected" : @([self isHookingFrameworkDetected]),
     @"is_device_secure" : @([self hasDeviceLock]),
   };
 }
