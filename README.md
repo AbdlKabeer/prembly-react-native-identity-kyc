@@ -213,6 +213,7 @@ Not collected: advertising ID, IMEI, MAC address, serial number, contacts, messa
 
 ## Changelog
 
+- **2.0.3:** `integrity.hooking_framework_detected` on Android and iOS (Frida, Xposed, LSPosed, Substrate). On iOS a hooked device no longer sets `is_rooted`; it sets this flag instead.
 - **2.0.2:** new `prefill` prop on `PremblyWorkflow`: pass an ID you already have (`nin`, `bvn`, `passport`, `driversLicense` or `votersCard`, exactly one) and the person skips the ID screen. `customer`, `metadata` and `prefill` are now read when the workflow opens, not when the component first renders.
 - **2.0.1:** new `PremblyWorkflow` component: starts one of your workflows with your public key, opens it in your app, and gives it the phone's real device ID and details. Optional `metadata`, `redirectUrl`, `hostedUrl`.
 - **2.0.0:** the library now serves both the Identity KYC widget and Transaction Monitoring. The widget reads the phone's real device ID and details and hands them to the verification page. Screen recording is detected on iOS and on Android 15 and later, and watched while the widget is open. Requires a native build with the New Architecture.
