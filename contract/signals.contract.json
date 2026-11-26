@@ -32,6 +32,7 @@
       "is_rooted",
       "is_emulator",
       "is_debugger_attached",
+      "hooking_framework_detected",
       "developer_options_enabled",
       "usb_debugging_enabled",
       "is_device_secure"
@@ -75,6 +76,7 @@
       "is_rooted",
       "is_emulator",
       "is_debugger_attached",
+      "hooking_framework_detected",
       "is_device_secure"
     ],
     "network": [
