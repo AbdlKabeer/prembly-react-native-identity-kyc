@@ -140,7 +140,7 @@ describe('startScreenWatch', () => {
 describe('buildScreenUpdateScript', () => {
   const run = (
     state: { current: boolean; seen: boolean },
-    options: { origin?: string; device?: any } = {}
+    options: { origin?: string; device?: any; scriptOrigin?: string } = {}
   ) => {
     const events: string[] = [];
     const win: any = {
@@ -158,9 +158,19 @@ describe('buildScreenUpdateScript', () => {
       }
     };
     // eslint-disable-next-line no-new-func
-    new Function('window', buildScreenUpdateScript(state))(win);
+    new Function('window', buildScreenUpdateScript(state, options.scriptOrigin))(win);
     return { win, events };
   };
+
+  it('updates a page on the origin it was told about, such as a local link', () => {
+    const local = 'http://localhost:3010';
+    const { win, events } = run(
+      { current: true, seen: true },
+      { origin: local, scriptOrigin: local }
+    );
+    expect(win.__PREMBLY_NATIVE_DEVICE__.signals.scam_signals.is_screen_shared_or_recorded).toBe(true);
+    expect(events).toEqual(['prembly:native-device-update']);
+  });
 
   it('writes the current and the seen flags into the page data', () => {
     const { win } = run({ current: true, seen: true });
