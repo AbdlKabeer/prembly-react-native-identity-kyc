@@ -1,4 +1,5 @@
 #import "TMSignalCollector.h"
+#import "TMExtendedSignals.h"
 
 #import <CFNetwork/CFNetwork.h>
 #import <CoreLocation/CoreLocation.h>
@@ -89,6 +90,7 @@
     @"cpu_cores" : @(NSProcessInfo.processInfo.activeProcessorCount),
   } mutableCopy];
   [section addEntriesFromDictionary:[self screenMetrics]];
+  [section addEntriesFromDictionary:[TMExtendedSignals deviceContext]];
   return section;
 }
 
@@ -331,6 +333,7 @@
     @"is_screen_shared_or_recorded" : @([self isScreenCaptured]),
     // iOS does not let an app see which other apps are running.
     @"remote_access_app_running" : @NO,
+    @"on_phone_call" : [TMExtendedSignals onPhoneCall] ?: @NO,
   };
 }
 

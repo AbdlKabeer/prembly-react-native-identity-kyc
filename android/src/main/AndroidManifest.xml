@@ -3,6 +3,12 @@
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
   <!--
+    Normal permission (no prompt): lets the SDK read the wifi name and access point, and only when
+    the app already holds location permission. The SDK never asks for it.
+  -->
+  <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+  <!--
     Normal permission (no prompt), Android 15 and later: lets the SDK ask the system whether the
     screen is being recorded while a verification is open. Without it the SDK falls back to
     looking for a cast or mirrored display.
@@ -28,5 +34,10 @@
     <package android:name="com.carriez.flutter_hbb" />
     <package android:name="com.sand.airdroid" />
     <package android:name="com.sand.airmirror" />
+    <package android:name="com.lexa.fakegps" />
+    <package android:name="com.incorporateapps.fakegps.fre" />
+    <package android:name="ru.gavrikov.mocklocations" />
+    <package android:name="com.theappninjas.gpsjoystick" />
+    <package android:name="com.truedevelopersstudio.automatictap.autoclicker" />
   </queries>
 </manifest>

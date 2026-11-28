@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { nativeDevice } from './native';
+import { sha256Hex } from './sha256';
 import type {
   AppInfo,
   DeviceSession,
@@ -174,6 +175,7 @@ class PremblyTMClient {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), config.timeoutMs);
     try {
+      const encoded = JSON.stringify(body);
       const response = await fetch(`${config.baseUrl}${SESSIONS_PATH}`, {
         method: 'POST',
         signal: controller.signal,
@@ -183,8 +185,10 @@ class PremblyTMClient {
           'X-App-Id': app.appId,
           'X-SDK-Platform': Platform.OS,
           'X-SDK-Version': SDK_VERSION,
+          // A checksum of the exact body, so the server can tell if it changed on the way.
+          'X-Payload-Digest': sha256Hex(encoded),
         },
-        body: JSON.stringify(body),
+        body: encoded,
       });
 
       if (!response.ok) {

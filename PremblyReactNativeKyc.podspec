@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
   s.private_header_files = "ios/**/*.h"
 
-  s.frameworks = "UIKit", "Security", "SystemConfiguration", "CFNetwork", "LocalAuthentication", "CoreLocation"
+  s.frameworks = "UIKit", "Security", "SystemConfiguration", "CFNetwork", "LocalAuthentication", "CoreLocation", "CoreTelephony", "CallKit"
 
   install_modules_dependencies(s)
 end

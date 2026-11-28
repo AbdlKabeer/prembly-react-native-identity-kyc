@@ -26,7 +26,22 @@
       "screen_density",
       "brand",
       "sdk_int",
-      "security_patch"
+      "security_patch",
+      "install_source",
+      "cpu_architecture",
+      "storage_free_percent",
+      "battery_level",
+      "battery_health",
+      "battery_technology",
+      "battery_temperature_c",
+      "battery_voltage_mv",
+      "carrier_name",
+      "carrier_country",
+      "carrier_mcc",
+      "carrier_mnc",
+      "wifi_ssid",
+      "wifi_bssid",
+      "signing_cert_sha256"
     ],
     "integrity": [
       "is_rooted",
@@ -35,7 +50,16 @@
       "hooking_framework_detected",
       "developer_options_enabled",
       "usb_debugging_enabled",
-      "is_device_secure"
+      "is_device_secure",
+      "clone_app_detected",
+      "device_masked",
+      "virtual_os",
+      "auto_clicker_enabled",
+      "secondary_user",
+      "vpn_spoofer_app_running",
+      "gps_spoofer_app_running",
+      "sdk_connection_intercepted",
+      "usb_debugging_in_progress"
     ],
     "network": [
       "type",
@@ -45,7 +69,8 @@
     "scam_signals": [
       "is_screen_shared_or_recorded",
       "remote_access_app_running",
-      "remote_access_app_installed"
+      "remote_access_app_installed",
+      "on_phone_call"
     ],
     "location": [
       "lat",
@@ -70,7 +95,18 @@
       "cpu_cores",
       "screen_width",
       "screen_height",
-      "screen_density"
+      "screen_density",
+      "install_source",
+      "cpu_architecture",
+      "storage_free_percent",
+      "battery_level",
+      "carrier_name",
+      "carrier_country",
+      "carrier_mcc",
+      "carrier_mnc",
+      "wifi_ssid",
+      "wifi_bssid",
+      "apple_team_id"
     ],
     "integrity": [
       "is_rooted",
@@ -86,7 +122,8 @@
     ],
     "scam_signals": [
       "is_screen_shared_or_recorded",
-      "remote_access_app_running"
+      "remote_access_app_running",
+      "on_phone_call"
     ],
     "location": [
       "lat",
