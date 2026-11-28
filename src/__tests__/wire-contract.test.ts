@@ -164,7 +164,9 @@ describe('native signal keys', () => {
   const kotlin = ['SignalCollector.kt', 'ExtendedSignals.kt']
     .map((file) => readFileSync(join(ROOT, 'android/src/main/java/com/prembly/device', file), 'utf8'))
     .join('\n');
-  const objc = readFileSync(join(ROOT, 'ios/TMSignalCollector.m'), 'utf8');
+  const objc = ['TMSignalCollector.m', 'TMExtendedSignals.m']
+    .map((file) => readFileSync(join(ROOT, 'ios', file), 'utf8'))
+    .join('\n');
 
   const keysIn = (source: string, pattern: RegExp) =>
     new Set([...source.matchAll(pattern)].map((match) => match[1]));
@@ -184,8 +186,10 @@ describe('native signal keys', () => {
   it('iOS sends exactly the contract keys', () => {
     // Dictionary keys at the start of a line (@"key" : value) and signals[@"section"] assignments.
     const found = new Set([
-      ...keysIn(objc, /^\s*@"([a-z_]+)"\s*:/gm),
+      ...keysIn(objc, /^\s*@"([a-z0-9_]+)"\s*:/gm),
       ...keysIn(objc, /signals\[@"([a-z_]+)"\]/g),
+      ...keysIn(objc, /\bout\[@"([a-z0-9_]+)"\]/g),
+      ...keysIn(objc, /key:@"([a-z0-9_]+)"/g),
     ]);
     expect([...found].sort()).toEqual([...expected('ios')].sort());
   });
